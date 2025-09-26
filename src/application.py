@@ -9,6 +9,12 @@ import plotly.graph_objects as go
 import plotly.io as pio
 pio.templates.default = "plotly_white"
 
+from flask import Flask
+from dash import Dash
+
+server = Flask(__name__)  # this is correct
+app = Dash(__name__, server=server)
+
 from polygon import RESTClient
 from dateutil.relativedelta import relativedelta
 
