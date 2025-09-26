@@ -15,6 +15,8 @@ from dash import Dash
 server = Flask(__name__)  # this is correct
 app = Dash(__name__, server=server)
 
+application = app.server
+
 from polygon import RESTClient
 from dateutil.relativedelta import relativedelta
 
