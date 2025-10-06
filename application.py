@@ -37,7 +37,7 @@ from dashboard_utils import (
 """
 Fetch Data 
 """
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 filepath = os.path.join(BASE_DIR, "BUFC_May_2025_Allocations.xlsx")
 
 holdings = load_clean_holdings(filepath)
