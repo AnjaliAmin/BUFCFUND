@@ -12,8 +12,10 @@ s3 = boto3.client("s3")
 bucket = "csvfilesbufc"
 
 # Read CSV
-price_obj = s3.get_object(Bucket=bucket, Key="daily_prices.csv")
+price_obj = s3.get_object(Bucket=bucket, Key="./daily_prices.csv")
+rut_obj = s3.get_object(Bucket=bucket, Key="./rut_daily.csv")
 DEFAULT_PRICE_CSV = pd.read_csv(price_obj["Body"])
+DEFAULT_RUT_CSV = pd.read_csv(rut_obj["Body"])
 
 # Save CSV
 csv_buffer = StringIO()
