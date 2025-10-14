@@ -5,10 +5,20 @@ from pathlib import Path
 from polygon import RESTClient
 from datetime import datetime, timezone
 from typing import Iterable, Optional, Tuple
+import boto3
+from io import StringIO
 
-ROOT_DIR = Path(__file__).resolve().parent.parent
-DEFAULT_PRICE_CSV = ROOT_DIR / "daily_prices.csv"
-DEFAULT_RUT_CSV   = ROOT_DIR / "rut_daily.csv"
+s3 = boto3.client("s3")
+bucket = "csvfilesbufc"
+
+# Read CSV
+price_obj = s3.get_object(Bucket=bucket, Key="daily_prices.csv")
+DEFAULT_PRICE_CSV = pd.read_csv(price_obj["Body"])
+
+# Save CSV
+csv_buffer = StringIO()
+df.to_csv(csv_buffer, index=False)
+s3.put_object(Bucket=bucket, Key="daily_prices.csv", Body=csv_buffer.getvalue())
 
 def _resolve_to_root(path_like) -> Path:
     """Return an absolute Path. Relative paths are resolved against project root."""
