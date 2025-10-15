@@ -16,6 +16,8 @@ price_obj = s3.get_object(Bucket=bucket, Key="./daily_prices.csv")
 rut_obj = s3.get_object(Bucket=bucket, Key="./rut_daily.csv")
 DEFAULT_PRICE_CSV = pd.read_csv(price_obj["Body"])
 DEFAULT_RUT_CSV = pd.read_csv(rut_obj["Body"])
+DEFAULT_PRICE_CSV_PATH = "./daily_prices.csv"
+DEFAULT_RUT_CSV_PATH = "./rut_daily.csv"
 
 def _resolve_to_root(path_like) -> Path:
     """Return an absolute Path. Relative paths are resolved against project root."""
@@ -83,7 +85,7 @@ def load_clean_sector_allocations(filepath: str, sheet_name=1):
 def fetch_price_data(
     companies, 
     client, 
-    csv_path: str | Path = DEFAULT_PRICE_CSV,
+    csv_path: str | Path = DEFAULT_PRICE_CSV_PATH,
     start_date: str | datetime = "2025-01-01",
     end_date: datetime | None = None,
     request_limit_per_min: int = 4,   
@@ -192,7 +194,7 @@ def fetch_price_data(
 
 def fetch_RUT_data(
     client,
-    csv_path: str | Path = DEFAULT_RUT_CSV,
+    csv_path: str | Path = DEFAULT_RUT_CSV_PATH,
     start_date: str | datetime = "2025-01-01",
     end_date: datetime | None = None,
     polygon_limit: int = 5000,  # allow long spans
