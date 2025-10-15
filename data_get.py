@@ -12,12 +12,12 @@ s3 = boto3.client("s3")
 bucket = "csvfilesbufc"
 
 # Read CSV
-# price_obj = s3.get_object(Bucket=bucket, Key="daily_prices.csv")
-# rut_obj = s3.get_object(Bucket=bucket, Key="rut_daily.csv")
+# price_obj = s3.get_object(Bucket=bucket, Key="./daily_prices.csv")
+# rut_obj = s3.get_object(Bucket=bucket, Key="./rut_daily.csv")
 # DEFAULT_PRICE_CSV = pd.read_csv(price_obj["Body"])
 # DEFAULT_RUT_CSV = pd.read_csv(rut_obj["Body"])
-DEFAULT_PRICE_CSV_PATH = "daily_prices.csv"
-DEFAULT_RUT_CSV_PATH = "rut_daily.csv"
+DEFAULT_PRICE_CSV_PATH = "./daily_prices.csv"
+DEFAULT_RUT_CSV_PATH = "./rut_daily.csv"
 
 def _read_cached_wide_s3(key: str) -> pd.DataFrame:
     """Read a CSV from S3 into a DataFrame, set date index, sort by date."""
@@ -90,7 +90,7 @@ def load_clean_sector_allocations(filepath: str, sheet_name=1):
 def fetch_price_data(
     companies, 
     client, 
-    s3_key: str = "daily_prices.csv",  # S3 key
+    s3_key: str = "./daily_prices.csv",  # S3 key
     start_date: str | datetime = "2025-01-01",
     end_date: datetime | None = None,
     request_limit_per_min: int = 4,   
@@ -181,7 +181,7 @@ def fetch_price_data(
 
 def fetch_RUT_data(
     client,
-    s3_key: str = "rut_daily.csv",
+    s3_key: str = "./rut_daily.csv",
     start_date: str | datetime = "2025-01-01",
     end_date: datetime | None = None,
     polygon_limit: int = 5000,
