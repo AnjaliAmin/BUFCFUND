@@ -19,11 +19,6 @@ DEFAULT_RUT_CSV = pd.read_csv(rut_obj["Body"])
 DEFAULT_PRICE_CSV_PATH = "./daily_prices.csv"
 DEFAULT_RUT_CSV_PATH = "./rut_daily.csv"
 
-def _resolve_to_root(path_like) -> Path:
-    """Return an absolute Path. Relative paths are resolved against project root."""
-    p = Path(path_like)
-    return p if p.is_absolute() else (ROOT_DIR / p)
-
 def _read_cached_wide_s3(key: str) -> pd.DataFrame:
     """Read a CSV from S3 into a DataFrame, set date index, sort by date."""
     try:
@@ -112,8 +107,7 @@ def fetch_price_data(
       - Respects a simple per-minute rate limit and a small delay between calls.
       - Returns a wide DataFrame indexed by date; columns are tickers.
     """
-    
-    csv_path = _resolve_to_root(csv_path)
+
     prices = _read_cached_wide_s3(csv_path)
 
     start_dt = pd.to_datetime(start_date)
