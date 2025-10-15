@@ -109,7 +109,6 @@ app.layout = html.Div([
                 ),
                 style={'padding': '20px'}
             )
-            )
         ]),
 
         dcc.Tab(label='Performance', children=[
