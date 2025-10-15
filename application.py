@@ -5,6 +5,7 @@ import time
 import dash
 import os
 from dash import dcc, html
+from dash import dash_table
 import plotly.graph_objects as go
 import plotly.io as pio
 pio.templates.default = "plotly_white"
@@ -30,7 +31,7 @@ from dashboard_utils import (
     compute_daily_pct_change, assign_color, 
     create_treemap, create_sparkline, 
     create_holdings_table, compute_cumulative_returns, 
-    create_sector_donut
+    _sector_donut
 )
 
 
@@ -72,7 +73,7 @@ live_portfolio['color'] = live_portfolio['pct_change'].apply(assign_color)
 # Cumulative returns (portfolio vs IWM)
 portfolio_cum, benchmark_cum = compute_cumulative_returns(live_portfolio, prices_data, rut_series)
 
-#create data for sector donut 
+# data for sector donut 
 sector_df = sector_allocations.copy()
 if 'Value' not in sector_df.columns and '% of Fund' in sector_df.columns:
     sector_df = sector_df.rename(columns={'% of Fund': 'Value'})
@@ -83,7 +84,7 @@ if 'Sector' in sector_df.columns:
 
 
 """
-Create Dash app 
+ Dash app 
 """
 app.title = "BUFC Fund Dashboard"
 
@@ -93,13 +94,21 @@ app.layout = html.Div([
             html.H1('Holdings', style={'text-align': 'center', 'margin-top': '20px'}),
 
             html.Div(
-                dcc.Graph(figure=create_treemap(live_portfolio)),
+                dcc.Graph(figure=_treemap(live_portfolio)),
                 style={'width': '100%', 'display': 'inline-block'}
             ),
 
             html.Div(
-                create_holdings_table(live_portfolio, prices_data),
+                dash_table.DataTable(
+                    columns=[{"name": i, "id": i} for i in live_portfolio.columns],
+                    data=live_portfolio.to_dict('records'),
+                    style_table={'overflowX': 'auto'},
+                    style_cell={'textAlign': 'left', 'padding': '5px'},
+                    style_header={'fontWeight': 'bold'},
+                    page_size=20  # optional, allows pagination
+                ),
                 style={'padding': '20px'}
+            )
             )
         ]),
 
