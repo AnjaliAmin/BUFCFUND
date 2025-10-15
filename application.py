@@ -94,7 +94,7 @@ app.layout = html.Div([
             html.H1('Holdings', style={'text-align': 'center', 'margin-top': '20px'}),
 
             html.Div(
-                dcc.Graph(figure=_treemap(live_portfolio)),
+                dcc.Graph(figure=create_treemap(live_portfolio)),
                 style={'width': '100%', 'display': 'inline-block'}
             ),
 
@@ -146,7 +146,7 @@ app.layout = html.Div([
             ),
 
             html.Div(
-                dcc.Graph(figure=create_sector_donut(sector_df)),
+                dcc.Graph(figure=_sector_donut(sector_df)),
                 style={'width': '50%', 'margin': 'auto', 'padding': '20px'}
             )
         ])
