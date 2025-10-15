@@ -17,11 +17,6 @@ rut_obj = s3.get_object(Bucket=bucket, Key="./rut_daily.csv")
 DEFAULT_PRICE_CSV = pd.read_csv(price_obj["Body"])
 DEFAULT_RUT_CSV = pd.read_csv(rut_obj["Body"])
 
-# Save CSV
-csv_buffer = StringIO()
-df.to_csv(csv_buffer, index=False)
-s3.put_object(Bucket=bucket, Key="daily_prices.csv", Body=csv_buffer.getvalue())
-
 def _resolve_to_root(path_like) -> Path:
     """Return an absolute Path. Relative paths are resolved against project root."""
     p = Path(path_like)
