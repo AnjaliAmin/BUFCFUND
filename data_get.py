@@ -24,20 +24,30 @@ def _resolve_to_root(path_like) -> Path:
     p = Path(path_like)
     return p if p.is_absolute() else (ROOT_DIR / p)
 
-def _read_cached_wide(path: Path) -> pd.DataFrame:
-    if path.exists():
-        df = pd.read_csv(path, parse_dates=["date"])
-        df.set_index("date", inplace=True)
+def _read_cached_wide_s3(key: str) -> pd.DataFrame:
+    """Read a CSV from S3 into a DataFrame, set date index, sort by date."""
+    try:
+        obj = s3.get_object(Bucket=bucket, Key=key)
+        df = pd.read_csv(obj['Body'], parse_dates=['date'])
+        df.set_index('date', inplace=True)
         df.index = pd.to_datetime(df.index)
         return df.sort_index()
-    return pd.DataFrame()
+    except s3.exceptions.NoSuchKey:
+        # File not in S3 yet
+        return pd.DataFrame()
+    except Exception as e:
+        print(f"Failed to read {key} from S3: {e}")
+        return pd.DataFrame()
 
-def _write_cached(df: pd.DataFrame, path: Path) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    
-    out = df.sort_index()
-    out.index.name = "date"
-    df.sort_index().to_csv(path, date_format="%Y-%m-%d")
+def _write_cached_s3(df: pd.DataFrame, key: str) -> None:
+    """Write DataFrame to S3 as CSV, sorted by date."""
+    if df.empty:
+        return
+    df_to_save = df.sort_index()
+    df_to_save.index.name = 'date'
+    csv_buffer = StringIO()
+    df_to_save.to_csv(csv_buffer, date_format="%Y-%m-%d")
+    s3.put_object(Bucket=bucket, Key=key, Body=csv_buffer.getvalue())
 
 def _sleep_with_jitter(base: float, jitter: float = 0.4):
     time.sleep(base + random.random() * jitter)
@@ -104,7 +114,7 @@ def fetch_price_data(
     """
     
     csv_path = _resolve_to_root(csv_path)
-    prices = _read_cached_wide(csv_path)
+    prices = _read_cached_wide_s3(csv_path)
 
     start_dt = pd.to_datetime(start_date)
     end_dt = end_date or datetime.today()
@@ -188,7 +198,7 @@ def fetch_price_data(
         except Exception as e:
             print(f"{ticker}: failed with error {e}")
 
-    _write_cached(prices, csv_path)
+    _write_cached_s3(prices, csv_path)
     return prices
 
 
@@ -205,11 +215,11 @@ def fetch_RUT_data(
       - fetches missing dates
       - writes back after updates
     """
-    csv_path = _resolve_to_root(csv_path)
 
     # Load cache as df (index=date, col='price')
-    if Path(csv_path).exists():
-        cached = pd.read_csv(csv_path, parse_dates=["date"]).set_index("date").sort_index()
+    rut_df = _read_cached_wide_s3(csv_path)  # returns empty DataFrame if key does not exist
+    if "price" not in rut_df.columns and "IWM" in rut_df.columns:
+        rut_df = rut_df.rename(columns={"IWM": "price"})
         cached.index = pd.to_datetime(cached.index)
         if "price" not in cached.columns:  # backward compatibility with 'IWM'
             # handle a previous cache with 'IWM' col
@@ -263,8 +273,7 @@ def fetch_RUT_data(
                 rut_df = combined.sort_index()
 
             # persist cache (index->date)
-            out = rut_df.sort_index().rename_axis("date").reset_index()
-            out.to_csv(csv_path, index=False, date_format="%Y-%m-%d")
+            _write_cached_s3(rut_df, csv_path)
 
     return rut_df["price"].sort_index()
 
