@@ -85,7 +85,6 @@ if 'Sector' in sector_df.columns:
 """
 Create Dash app 
 """
-app = dash.Dash(__name__)
 app.title = "BUFC Fund Dashboard"
 
 app.layout = html.Div([
