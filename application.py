@@ -31,7 +31,7 @@ from dashboard_utils import (
     compute_daily_pct_change, assign_color, 
     create_treemap, create_sparkline, 
     create_holdings_table, compute_cumulative_returns, 
-    _sector_donut
+    create_sector_donut
 )
 
 
@@ -146,7 +146,7 @@ app.layout = html.Div([
             ),
 
             html.Div(
-                dcc.Graph(figure=_sector_donut(sector_df)),
+                dcc.Graph(figure=create_sector_donut(sector_df)),
                 style={'width': '50%', 'margin': 'auto', 'padding': '20px'}
             )
         ])
